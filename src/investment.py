@@ -13,32 +13,42 @@ from sklearn.ensemble import RandomForestClassifier,AdaBoostRegressor
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import GridSearchCV
 
-def clean(file_path):
-    '''
-    Parameters
-        file_path: takes in a file path
-    Returns
-        a cleaned df
-    '''
-    df = pd.read_csv(file_path,encoding='latin1')
-    df.dropna(inplace=True)
-    df.drop(['permalink','region','founded_month','founded_quarter'],axis=1,inplace=True)
-    df['founded_at'] = pd.to_datetime(df['founded_at'],errors='coerce')
-    df['first_funding_at']= pd.to_datetime(df['first_funding_at'],errors='coerce')
-    df['last_funding_at']= pd.to_datetime(df['first_funding_at'],errors='coerce')
-    df['founded_year'] = df['founded_year'].astype('int64')
-    df.drop(df[df['country_code']=='CAN'].index,inplace=True)
-    df['funding_total_usd'] = df[' funding_total_usd '].apply(lambda x: x.replace(' ',''))\
-        .apply(lambda x: x.replace(',',''))
-    df['funding_total_usd'] = df['funding_total_usd'].apply(lambda x: x.replace('-','0'))
-    df['funding_total_usd'] = df['funding_total_usd'].astype('int64')
-    df['market'] = df[' market '].apply(lambda x: x.replace(' ',''))
-    df.drop(' market ',axis=1,inplace=True)
-    df.drop(' funding_total_usd ',axis=1,inplace=True)
-    df.drop('country_code',axis=1,inplace=True)
-    df.drop('homepage_url',axis=1,inplace=True)
-    df.drop('name',axis=1,inplace=True)
-    return df
+class DataFrame(object):
+
+    def __init__(self,file_path):
+        """Create df object
+        Parameters
+        ----------
+        file_path: takes in a file path to raw data
+        """
+        self.file_path = file_path
+        
+    def clean(self):
+        '''
+        Parameters
+            self: self
+        Returns
+            a cleaned df
+        '''
+        df = pd.read_csv(self.file_path,encoding='latin1')
+        df.dropna(inplace=True)
+        df.drop(['permalink','region','founded_month','founded_quarter'],axis=1,inplace=True)
+        df['founded_at'] = pd.to_datetime(df['founded_at'],errors='coerce')
+        df['first_funding_at']= pd.to_datetime(df['first_funding_at'],errors='coerce')
+        df['last_funding_at']= pd.to_datetime(df['first_funding_at'],errors='coerce')
+        df['founded_year'] = df['founded_year'].astype('int64')
+        df.drop(df[df['country_code']=='CAN'].index,inplace=True)
+        df['funding_total_usd'] = df[' funding_total_usd '].apply(lambda x: x.replace(' ',''))\
+            .apply(lambda x: x.replace(',',''))
+        df['funding_total_usd'] = df['funding_total_usd'].apply(lambda x: x.replace('-','0'))
+        df['funding_total_usd'] = df['funding_total_usd'].astype('int64')
+        df['market'] = df[' market '].apply(lambda x: x.replace(' ',''))
+        df.drop(' market ',axis=1,inplace=True)
+        df.drop(' funding_total_usd ',axis=1,inplace=True)
+        df.drop('country_code',axis=1,inplace=True)
+        df.drop('homepage_url',axis=1,inplace=True)
+        df.drop('name',axis=1,inplace=True)
+        return df
 
 def feature_engineer(df):
     '''
@@ -48,7 +58,8 @@ def feature_engineer(df):
         a data frame with engineered features
     '''
     df['time_to_funding'] = abs((df['first_funding_at']-df['founded_at']).dt.days)
-    test_list = list(df['market'].value_counts().rename_axis('market').reset_index(name='counts')[:20]['market'])
+    test_list = list(df['market'].value_counts()\
+        .rename_axis('market').reset_index(name='counts')[:20]['market'])
     df.loc[~df["market"].isin(test_list), "market"] = "Other"
     df.dropna(inplace=True)
     return df
@@ -69,8 +80,8 @@ def create_pie_charts(df,column,column_val,target):
     pie_df['pct'] = pie_df['counts']/len(pie_df)
     labels=pie_df[target]
     fig, ax = plt.subplots(figsize=(14,7))
-    ax.pie(pie_df['pct'], explode=[0,0,.15], labels=labels, \
-        autopct='%1.1f%%',shadow=True, startangle=50)
+    ax.pie(pie_df['pct'], explode=[0,.2,0], labels=labels, \
+        autopct='%1.1f%%',shadow=False, startangle=50)
     ax.axis('equal')
     ax.set_title(f'{target.capitalize()} Of {column_val_title} Market')
     plt.savefig(f'../images/{column_val}_pie.png',dpi=500)
@@ -78,27 +89,30 @@ def create_pie_charts(df,column,column_val,target):
 
 
 if __name__ == '__main__':
-    intial_df =clean('../../../Downloads/investments_VC.csv')
+
+    #intialized dataframe class and build features
+    intial_df = DataFrame('../../../Downloads/investments_VC.csv').clean()
     clean_feat_df=feature_engineer(intial_df)
 
-
-    col_list = list(clean_feat_df['market'].value_counts().sort_values().rename_axis('market').reset_index(name='counts')['market'])
-    market_dummies = pd.get_dummies(clean_feat_df['market']).reindex(columns=col_list)
-    state_dummies = pd.get_dummies(clean_feat_df['state_code'])
-
+    #order Markets to be used for all pie charts
+    col_list = list(clean_feat_df['market'].value_counts()\
+        .sort_values().rename_axis('market').reset_index(name='counts')['market'])
+    
+    #Create Pie charts for top 20 markets and their status
     for val in col_list[:len(col_list)-1]:
         create_pie_charts(clean_feat_df,'market',val,'status')
 
 
-    #plot 1
-    time_df = clean_feat_df['founded_year'].value_counts().rename_axis('year').reset_index(name='counts')
+    #plot businesses opened versus first round deals
+    time_df = clean_feat_df['founded_year'].value_counts()\
+        .rename_axis('year').reset_index(name='counts')
     time_df.sort_values(by='year',inplace=True)
     time_df
     x1 = time_df[time_df['year']>1980]['year']
     y1 = time_df[time_df['year']>1980]['counts']
 
-    funding_df = clean_feat_df['first_funding_at'].dt.year.value_counts().rename_axis('year')\
-        .reset_index(name='counts')
+    funding_df = clean_feat_df['first_funding_at'].dt.year.value_counts()\
+        .rename_axis('year').reset_index(name='counts')
     funding_df['year'] = funding_df['year'].astype('int64')
     funding_df.sort_values(by='year',inplace=True)
     x2 = funding_df[funding_df['year']>1980]['year']
@@ -115,10 +129,12 @@ if __name__ == '__main__':
     plt.xticks(rotation=45,ha='center')
     plt.savefig('../images/founded_vs_deals.png',dpi=500)
 
-    #plot 2
-    state_df = clean_feat_df['state_code'].value_counts().rename_axis('state').reset_index(name='counts')
+
+    #plot using folium to look at business and status by state
+    state_df = clean_feat_df['state_code'].value_counts()\
+        .rename_axis('state').reset_index(name='counts')
     state_df.sort_values(by='state',inplace=True)
-    closed_df = clean_feat_df[clean_feat_df['status']=='closed']['state_code']\
+    acquired_df = clean_feat_df[clean_feat_df['status']=='acquired']['state_code']\
         .value_counts().rename_axis('state').reset_index(name='counts')
     url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
     state_geo = f'{url}/us-states.json'
@@ -151,40 +167,46 @@ if __name__ == '__main__':
 
     folium.Choropleth(
         geo_data=state_geo,
-        name='Closed Businesses',
-        data=closed_df,
+        name='Acquired Businesses',
+        data=acquired_df,
         columns=['state', 'counts'],
         key_on='feature.id',
         fill_color='OrRd',
         fill_opacity=0.7,
         line_opacity=0.2,
-        legend_name='Closed Businesses'
+        legend_name='Acquired Businesses'
     ).add_to(m)
 
     folium.Choropleth(
         geo_data=state_geo,
-        name='Closed Businesses remove CA',
-        data=closed_df.drop(closed_df[closed_df['state']=='CA'].index),
+        name='acquired Businesses remove CA',
+        data=acquired_df.drop(acquired_df[acquired_df['state']=='CA'].index),
         columns=['state', 'counts'],
         key_on='feature.id',
         fill_color='OrRd',
         fill_opacity=0.7,
         line_opacity=0.2,
-        legend_name='Closed Businesses (No CA)'
+        legend_name='acquired Businesses (No CA)'
     ).add_to(m)
 
     folium.LayerControl().add_to(m)
 
     m.save('../images/business_map.html')
     
-    #Plot three
-    pie_df= clean_feat_df['status'].value_counts().rename_axis('status').reset_index(name='counts')
+    #Plot status for entire populattion
+    pie_df= clean_feat_df['status'].value_counts()\
+        .rename_axis('status').reset_index(name='counts')
     pie_df['pct'] = pie_df['counts']/len(clean_feat_df)
     labels=pie_df['status']
     fig, ax = plt.subplots(figsize=(14,7))
     ax.pie(pie_df['pct'], explode=[0,0,.15], labels=labels, autopct='%1.1f%%',
-            shadow=True, startangle=50)
+            shadow=False, startangle=50)
     ax.axis('equal') 
     ax.set_title('Status')
     plt.savefig('../images/all_markets_pie.png',dpi=500)
     plt.close()
+
+
+    market_dummies = pd.get_dummies(clean_feat_df['market']).reindex(columns=col_list)
+    state_dummies = pd.get_dummies(clean_feat_df['state_code'])
+
