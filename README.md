@@ -1,6 +1,15 @@
 # Startup Investment
+![](images/Startups1.jpg)
 
 ## Background
+* 77% of small businesses rely on personal savings for their initial funds.
+* A third of small businesses start with less than $5,000.
+* The average small business requires about $10,000 of startup capital.
+* Only 0.05% of startups raise venture capital.
+* The average seed round is $2.2 million.
+* The median company running a seed funding round is 3 years old.
+* Of startups that raised seed rounds, 1% reached unicorn status of $1B valuation.
+* Startups with two co-founders rather than one raise 30% more capital.
 
 ## Project Goal
 The goal of my project was to try and predict the status of a company using the very limited information an investor would know before the first round of funding. 
@@ -52,7 +61,7 @@ As the plot above shows my targets are heavily weighted on the operating class. 
 
 ![](images/HealthandWellness_pie.png)
 ![](images/Security_pie.png)
-![](images/Semiconductors.png)
+![](images/Semiconductors_pie.png)
 
 Because of these kinds of differences, I decided to feature engineer the market category to be the most prevalent twenty categories or to be classified as other. The first ten of these is shown below. Ultimately my top twenty made up a total of 56.74% of the entire market. 
 
