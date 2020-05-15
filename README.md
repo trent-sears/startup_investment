@@ -111,9 +111,9 @@ In conclusion, the biggest indicators of whether or not a company will be acquir
     - Volatilty Index (VIX)
     - Bond Interest Rates
     - Fear and Greed Index
-* Multinomial Prediciton
+* Multinomial prediciton
     - Predict acquired, closed, operating
-* Run Models To Predict other outcomes
+* Run models to predict other outcomes
     - Total investment recieved
     - Number of rounds
 
