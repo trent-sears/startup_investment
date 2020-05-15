@@ -1,17 +1,18 @@
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 17})
-import folium
-import re
-from sklearn import preprocessing
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import KFold, train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-from sklearn.ensemble import RandomForestClassifier,AdaBoostRegressor
-from imblearn.over_sampling import SMOTE
-from sklearn.model_selection import GridSearchCV
+def import_libraries():
+    import pandas as pd
+    import numpy as np
+    from datetime import datetime
+    import matplotlib.pyplot as plt
+    plt.rcParams.update({'font.size': 17})
+    import folium
+    import re
+    from sklearn import preprocessing
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import KFold, train_test_split
+    from sklearn.metrics import accuracy_score, precision_score, recall_score
+    from sklearn.ensemble import RandomForestClassifier,AdaBoostRegressor
+    from imblearn.over_sampling import SMOTE
+    from sklearn.model_selection import GridSearchCV
 
 class DataFrame(object):
 
@@ -43,8 +44,8 @@ class DataFrame(object):
         df['funding_total_usd'] = df['funding_total_usd'].apply(lambda x: x.replace('-','0'))
         df['funding_total_usd'] = df['funding_total_usd'].astype('int64')
         df['market'] = df[' market '].apply(lambda x: x.replace(' ',''))
-        df.drop([' market ',' funding_total_usd ','country_code','homepage_url','name','founded_year','city','last_funding_at', 'round_A', 'round_B',
-       'round_C', 'round_D', 'round_E', 'round_F', 'round_G', 'round_H'],axis=1,inplace=True)
+        df.drop([' market ',' funding_total_usd ','country_code','homepage_url','name','city','last_funding_at', 'round_A', 'round_B',
+       'round_C', 'round_D', 'round_E', 'round_F', 'round_G', 'round_H','category_list'],axis=1,inplace=True)
         return df
 
 def feature_engineer(df):
@@ -207,6 +208,52 @@ if __name__ == '__main__':
     plt.close()
 
 
+    funding_type_df = clean_feat_df.loc[:,'seed':'product_crowdfunding']\
+        .apply(lambda x: x>0).astype('int64')
+
+    col_list = list(clean_feat_df['market'].value_counts().sort_values()\
+        .rename_axis('market').reset_index(name='counts')['market'])
+
+    clean_feat_df['status'] = clean_feat_df['status'].apply(lambda x: x.replace('operating','0'))\
+        .apply(lambda x: x.replace('acquired','1')).apply(lambda x: x.replace('closed','0'))
+    clean_feat_df['status'] = clean_feat_df['status'].astype('int64')
+
     market_dummies = pd.get_dummies(clean_feat_df['market']).reindex(columns=col_list)
     state_dummies = pd.get_dummies(clean_feat_df['state_code'])
+                                
+    X =market_dummies.iloc[:,:20].join(state_dummies.iloc[:,:50])\
+        .join(clean_feat_df['time_to_funding']).join(funding_type_df).values
+    y=clean_feat_df['status'].values
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+    oversample = SMOTE()
+    X_train, y_train = oversample.fit_resample(X_train, y_train)
+
+
+    model = LogisticRegression(solver="lbfgs",max_iter=300)
+    model.fit(X_train, y_train)
+    y_predict = model.predict(X_test)
+
+    rf = RandomForestClassifier(oob_score=True,max_features=42, n_estimators=100)
+    rf.fit(X_train, y_train)
+    y_predict = rf.predict(X_test)
+                                
+       
+    #Make feature importance plot 
+    X =market_dummies.iloc[:,:20].join(state_dummies.iloc[:,:50])\
+        .join(clean_feat_df['time_to_funding']).join(funding_type_df)
+    importances = rf.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in rf.estimators_],
+                axis=0)
+    indices = np.argsort(importances)[::-1]
+    fig,ax = plt.subplots(figsize=(14,7))
+    ax.bar(range(0,10),importances[indices[:10]],color="r", yerr=std[indices[:10]], align="center")
+    plt.xticks(range(0,10), ['Venture', 'Time to Funding','CA','Seed','Debt Financing', 'MA', 'Software','Biotechnology','NY','Enterprise Software'],rotation=30,ha='right')
+    ax.set_xlabel('Features')
+    ax.set_ylabel('Feature Weights')
+    ax.set_title('Feature Importances',fontweight='bold')
+    plt.tight_layout()
+    plt.savefig('../images/feature_importances1.png')
+
 
