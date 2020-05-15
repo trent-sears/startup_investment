@@ -227,12 +227,12 @@ if __name__ == '__main__':
     #build logisitic model
     model = LogisticRegression(solver="lbfgs",max_iter=300)
     model.fit(X_train, y_train)
-    y_predict = model.predict(X_test)
+    y_predict_log = model.predict(X_test)
 
     #build random forest model
     rf = RandomForestClassifier(oob_score=True,max_features=42, n_estimators=100)
     rf.fit(X_train, y_train)
-    y_predict = rf.predict(X_test)
+    y_predict_rf = rf.predict(X_test)
                                 
        
     #Make feature importance plot on random forest
