@@ -1,18 +1,18 @@
-def import_libraries():
-    import pandas as pd
-    import numpy as np
-    from datetime import datetime
-    import matplotlib.pyplot as plt
-    plt.rcParams.update({'font.size': 17})
-    import folium
-    import re
-    from sklearn import preprocessing
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import KFold, train_test_split
-    from sklearn.metrics import accuracy_score, precision_score, recall_score
-    from sklearn.ensemble import RandomForestClassifier,AdaBoostRegressor
-    from imblearn.over_sampling import SMOTE
-    from sklearn.model_selection import GridSearchCV
+
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 17})
+import folium
+import re
+from sklearn import preprocessing
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import KFold, train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.ensemble import RandomForestClassifier,AdaBoostRegressor
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import GridSearchCV
 
 class DataFrame(object):
 
@@ -96,12 +96,21 @@ if __name__ == '__main__':
     col_list = list(clean_feat_df['market'].value_counts()\
         .sort_values().rename_axis('market').reset_index(name='counts')['market'])
     
+    #change funding from to dollars to ones and zeros
+    funding_type_df = clean_feat_df.loc[:,'seed':'product_crowdfunding']\
+        .apply(lambda x: x>0).astype('int64')
+    funding_type_df.drop('undisclosed',axis=1,inplace=True)
+
+    #make dummies
+    market_dummies = pd.get_dummies(clean_feat_df['market'])\
+        .reindex(columns=col_list)
+    state_dummies = pd.get_dummies(clean_feat_df['state_code'])
+    
     #Create Pie charts for top 20 markets and their status
-    # for val in col_list[:len(col_list)-1]:
-    #     create_pie_charts(clean_feat_df,'market',val,'status')
+    for val in col_list[:len(col_list)-1]:
+        create_pie_charts(clean_feat_df,'market',val,'status')
 
-
-    #Set df of all business opened
+    #plot businesses opened versus first round deals
     time_df = clean_feat_df['founded_year'].value_counts()\
         .rename_axis('year').reset_index(name='counts')
     time_df.sort_values(by='year',inplace=True)
@@ -109,7 +118,6 @@ if __name__ == '__main__':
     x1 = time_df[time_df['year']>1980]['year']
     y1 = time_df[time_df['year']>1980]['counts']
 
-    #Set df of all business recieving funding 
     funding_df = clean_feat_df['first_funding_at'].dt.year.value_counts()\
         .rename_axis('year').reset_index(name='counts')
     funding_df['year'] = funding_df['year'].astype('int64')
@@ -117,7 +125,6 @@ if __name__ == '__main__':
     x2 = funding_df[funding_df['year']>1980]['year']
     y2 = funding_df[funding_df['year']>1980]['counts']
 
-    #plot businesses opened versus first round deals
     fig,ax = plt.subplots(figsize=(14,7))
     ax.plot(x1,y1,label='Businesses Founded')
     ax.plot(x2,y2,label='First Round Funding Deals')
@@ -139,7 +146,6 @@ if __name__ == '__main__':
         .value_counts().rename_axis('state').reset_index(name='counts')
     url = 'https://raw.githubusercontent.com/python-visualization/folium/master/examples/data'
     state_geo = f'{url}/us-states.json'
-
     m = folium.Map(location=[48, -102], zoom_start=3)
 
     folium.Choropleth(
@@ -189,9 +195,7 @@ if __name__ == '__main__':
         line_opacity=0.2,
         legend_name='acquired Businesses (No CA)'
     ).add_to(m)
-
     folium.LayerControl().add_to(m)
-
     m.save('../images/business_map.html')
     
     #Plot status for entire populattion
@@ -207,40 +211,31 @@ if __name__ == '__main__':
     plt.savefig('../images/all_markets_pie.png',dpi=500)
     plt.close()
 
-
-    funding_type_df = clean_feat_df.loc[:,'seed':'product_crowdfunding']\
-        .apply(lambda x: x>0).astype('int64')
-
-    col_list = list(clean_feat_df['market'].value_counts().sort_values()\
-        .rename_axis('market').reset_index(name='counts')['market'])
-
+     #set targets as ones and zeros
     clean_feat_df['status'] = clean_feat_df['status'].apply(lambda x: x.replace('operating','0'))\
         .apply(lambda x: x.replace('acquired','1')).apply(lambda x: x.replace('closed','0'))
     clean_feat_df['status'] = clean_feat_df['status'].astype('int64')
 
-    market_dummies = pd.get_dummies(clean_feat_df['market']).reindex(columns=col_list)
-    state_dummies = pd.get_dummies(clean_feat_df['state_code'])
-                                
+    #set X and Y, test train split and SMOTE                           
     X =market_dummies.iloc[:,:20].join(state_dummies.iloc[:,:50])\
         .join(clean_feat_df['time_to_funding']).join(funding_type_df).values
     y=clean_feat_df['status'].values
-
     X_train, X_test, y_train, y_test = train_test_split(X, y)
-
     oversample = SMOTE()
     X_train, y_train = oversample.fit_resample(X_train, y_train)
 
-
+    #build logisitic model
     model = LogisticRegression(solver="lbfgs",max_iter=300)
     model.fit(X_train, y_train)
     y_predict = model.predict(X_test)
 
+    #build random forest model
     rf = RandomForestClassifier(oob_score=True,max_features=42, n_estimators=100)
     rf.fit(X_train, y_train)
     y_predict = rf.predict(X_test)
                                 
        
-    #Make feature importance plot 
+    #Make feature importance plot on random forest
     X =market_dummies.iloc[:,:20].join(state_dummies.iloc[:,:50])\
         .join(clean_feat_df['time_to_funding']).join(funding_type_df)
     importances = rf.feature_importances_
