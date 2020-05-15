@@ -67,6 +67,11 @@ Because of these kinds of differences, I decided to feature engineer the market 
 
 ![](images/market_split.png) 
 
+Continuing on this path of looking at how select features impacted my ultimate target of status I decided to look at the different types of capital being raised. While in general, the splits were not as drastic as the market splits were, there were some interesting oddballs.
+
+![](images/venture_pie.png)
+![](images/equity_crowdfunding_pie.png)
+
 ## Model Preparation 
 Before I could perform any sort of model creation I had to find a way to balance handle the imbalanced classes. I decided to use the SMOTE technique on the training data after the test train split. Next, I decided to change the funding dollars to a dummy variable because an initial investor would not know how much money is going to be raised before investing. I also chose to one hot encode my targets where one represented being acquired and zero represented operating or closed.  
 
