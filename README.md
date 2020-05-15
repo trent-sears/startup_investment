@@ -117,6 +117,16 @@ In conclusion, the biggest indicators of whether or not a company will be acquir
     - Total investment recieved
     - Number of rounds
 
+## Learn More
+* Private Equity Changes Everything
+    - https://www.institutionalinvestor.com/article/b1hlsmsy1jpgtf/Private-Equity-Changes-Everything
+    
+* Software companies are spending billions on acquisitions, but how long will it last?
+    - https://www.marketwatch.com/story/software-companies-are-spending-billions-on-acquisitions-but-how-long-will-it-last-2019-09-03
+
+* What I Learned Each Time My Startups Got Acquired
+    - https://medium.com/@jproco/what-i-learned-each-time-my-startups-got-acquired-b6be1fa407bc
+
 
 
 
