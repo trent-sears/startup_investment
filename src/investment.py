@@ -43,11 +43,8 @@ class DataFrame(object):
         df['funding_total_usd'] = df['funding_total_usd'].apply(lambda x: x.replace('-','0'))
         df['funding_total_usd'] = df['funding_total_usd'].astype('int64')
         df['market'] = df[' market '].apply(lambda x: x.replace(' ',''))
-        df.drop(' market ',axis=1,inplace=True)
-        df.drop(' funding_total_usd ',axis=1,inplace=True)
-        df.drop('country_code',axis=1,inplace=True)
-        df.drop('homepage_url',axis=1,inplace=True)
-        df.drop('name',axis=1,inplace=True)
+        df.drop([' market ',' funding_total_usd ','country_code','homepage_url','name','founded_year','city','last_funding_at', 'round_A', 'round_B',
+       'round_C', 'round_D', 'round_E', 'round_F', 'round_G', 'round_H'],axis=1,inplace=True)
         return df
 
 def feature_engineer(df):
@@ -83,7 +80,7 @@ def create_pie_charts(df,column,column_val,target):
     ax.pie(pie_df['pct'], explode=[0,.2,0], labels=labels, \
         autopct='%1.1f%%',shadow=False, startangle=50)
     ax.axis('equal')
-    ax.set_title(f'{target.capitalize()} Of {column_val_title} Market')
+    ax.set_title(f'{target.capitalize()} Of {column_val_title} Market',fontweight='bold')
     plt.savefig(f'../images/{column_val}_pie.png',dpi=500)
     plt.close(fig='all')
 
@@ -99,11 +96,11 @@ if __name__ == '__main__':
         .sort_values().rename_axis('market').reset_index(name='counts')['market'])
     
     #Create Pie charts for top 20 markets and their status
-    for val in col_list[:len(col_list)-1]:
-        create_pie_charts(clean_feat_df,'market',val,'status')
+    # for val in col_list[:len(col_list)-1]:
+    #     create_pie_charts(clean_feat_df,'market',val,'status')
 
 
-    #plot businesses opened versus first round deals
+    #Set df of all business opened
     time_df = clean_feat_df['founded_year'].value_counts()\
         .rename_axis('year').reset_index(name='counts')
     time_df.sort_values(by='year',inplace=True)
@@ -111,6 +108,7 @@ if __name__ == '__main__':
     x1 = time_df[time_df['year']>1980]['year']
     y1 = time_df[time_df['year']>1980]['counts']
 
+    #Set df of all business recieving funding 
     funding_df = clean_feat_df['first_funding_at'].dt.year.value_counts()\
         .rename_axis('year').reset_index(name='counts')
     funding_df['year'] = funding_df['year'].astype('int64')
@@ -118,7 +116,8 @@ if __name__ == '__main__':
     x2 = funding_df[funding_df['year']>1980]['year']
     y2 = funding_df[funding_df['year']>1980]['counts']
 
-    fig,ax = plt.subplots(figsize=(16,8))
+    #plot businesses opened versus first round deals
+    fig,ax = plt.subplots(figsize=(14,7))
     ax.plot(x1,y1,label='Businesses Founded')
     ax.plot(x2,y2,label='First Round Funding Deals')
     ax.legend()
@@ -127,6 +126,7 @@ if __name__ == '__main__':
     ax.set_title('Businesses Founded & First Round Deals',fontweight='bold')
     ax.set_xticks(np.arange(1980, 2016, step=5))
     plt.xticks(rotation=45,ha='center')
+    plt.tight_layout()
     plt.savefig('../images/founded_vs_deals.png',dpi=500)
 
 
@@ -199,10 +199,10 @@ if __name__ == '__main__':
     pie_df['pct'] = pie_df['counts']/len(clean_feat_df)
     labels=pie_df['status']
     fig, ax = plt.subplots(figsize=(14,7))
-    ax.pie(pie_df['pct'], explode=[0,0,.15], labels=labels, autopct='%1.1f%%',
+    ax.pie(pie_df['pct'], explode=[0,.15,0], labels=labels, autopct='%1.1f%%',
             shadow=False, startangle=50)
     ax.axis('equal') 
-    ax.set_title('Status')
+    ax.set_title('Status',fontweight='bold')
     plt.savefig('../images/all_markets_pie.png',dpi=500)
     plt.close()
 
