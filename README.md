@@ -73,7 +73,7 @@ Continuing on this path of looking at how select features impacted my ultimate t
 ![](images/equity_crowdfunding_pie.png)
 
 ## Model Preparation 
-Before I could perform any sort of model creation I had to find a way to balance handle the imbalanced classes. I decided to use the SMOTE technique on the training data after the test train split. Next, I decided to change the funding dollars to a dummy variable because an initial investor would not know how much money is going to be raised before investing. I also chose to one hot encode my targets where one represented being acquired and zero represented operating or closed.  
+Because of the plots above, I decided to feature engineer funding into dummy variables because an initial investor would not know how much money is going to be raised before investing. I also chose to one hot encode my targets where one represented being acquired and zero represented operating or closed. After these modifiactions and fefore I could perform any sort of model creation I had to find a way to balance handle the imbalanced classes. I decided to use the SMOTE technique on the training data after the test train split.
 
 ### Baseline
 For my baseline model, I went with a simple logistic regression. I also decided on using the metrics of accuracy and precision. I decided precision would be best for the imbalances in my classes because the worst-case scenario would be predicting a business would be acquired when in reality it might not be. The output of my baseline model can be seen below. 

@@ -211,7 +211,7 @@ if __name__ == '__main__':
     plt.savefig('../images/all_markets_pie.png',dpi=500)
     plt.close()
 
-     #set targets as ones and zeros
+    #set targets as ones and zeros
     clean_feat_df['status'] = clean_feat_df['status'].apply(lambda x: x.replace('operating','0'))\
         .apply(lambda x: x.replace('acquired','1')).apply(lambda x: x.replace('closed','0'))
     clean_feat_df['status'] = clean_feat_df['status'].astype('int64')
