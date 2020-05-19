@@ -55,22 +55,22 @@ The next thing I was curious about was looking at business per state as well as 
 
 After both of these plots, I wanted to take a look at the status breakdown. I knew my status was going to be my target but I wanted to get a sense of how the data looked.
 
-![](images/all_markets_pie.png)
+![](images/business_status.png)
 
 As the plot above shows my targets are heavily weighted on the operating class. This plot made me recognize that I would ultimately need to try and predict something other than operating or not. After this plot I curious to know if all markets had similar distributions and I quickly discovered they did not. Ultimately I ended up making plots for twenty different markets. In the plots below I wanted to highlight the three biggest differences I saw. 
 
-![](images/HealthandWellness_pie.png)
-![](images/Security_pie.png)
-![](images/Semiconductors_pie.png)
+HealthandWellness_pie
+Security_pie
+Semiconductors_pie
 
 Because of these kinds of differences, I decided to feature engineer the market category to be the most prevalent twenty categories or to be classified as other. The first ten of these is shown below. Ultimately my top twenty made up a total of 56.74% of the entire market. 
 
-![](images/market_split.png) 
+market_split
 
 Continuing on this path of looking at how select features impacted my ultimate target of status I decided to look at the different types of capital being raised. While in general, the splits were not as drastic as the market splits were, there were some interesting oddballs.
 
-![](images/venture_pie.png)
-![](images/equity_crowdfunding_pie.png)
+venture_pie
+equity_crowdfunding_pie
 
 ## Model Preparation 
 Because of the plots above, I decided to feature engineer funding into dummy variables because an initial investor would not know how much money is going to be raised before investing. I also chose to one hot encode my targets where one represented being acquired and zero represented operating or closed. After these modifiactions and before I could perform any sort of model creation I had to find a way to balance handle the imbalanced classes. I decided to use the SMOTE technique on the training data after the test train split.
@@ -102,6 +102,8 @@ One possible practical use I see for this model would be an initial screen for f
 In conclusion, the biggest indicators of whether or not a company will be acquired for the different categories used as my predictors are seeking venture funding, the spread of days from founding to seeking funding, if the company is based in California and finally if they are a software company or not.
 
 ## Areas Of Future Improvement
+* Change threshold value for success 
+    - to raise precision
 * Try different class balancing techniques
     - class weights 
 * Try different Models
