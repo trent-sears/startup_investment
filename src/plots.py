@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 plt.rcParams.update({'font.size': 17})
 import folium
 import re
@@ -113,4 +114,79 @@ if __name__ == '__main__':
     ax.set_title('Business Status Percentages',fontweight='bold')
     plt.tight_layout()
     plt.savefig('../images/business_status.png')
-        
+
+    #Plot status by market splits
+    data = []
+    marketlist = ['HealthandWellness','Security','Semiconductors']
+    for val in marketlist:
+        markets = clean_feat_df[clean_feat_df['market']==val]['status'].value_counts().rename_axis('status').reset_index(name='counts')
+        markets['pct'] = round((markets['counts']/markets['counts'].sum())*100,2)
+        data.append(markets['pct'].values.tolist())
+
+    operating = [data[0][0],data[1][0],data[2][0]]
+    acquired = [data[0][1],data[1][1],data[2][1]]
+    closed = [data[0][2],data[1][2],data[2][2]]
+    
+    fig = plt.figure(figsize=(14,7))
+    ax = fig.add_subplot(111)
+    width = 0.25
+    N = 3
+    ind = np.arange(N)
+    rects1 = ax.bar(ind, operating, width)
+    rects2 = ax.bar(ind+width, acquired, width)
+    rects3 = ax.bar(ind+width+width, closed, width)
+    ax.set_ylabel('Percentage(%)')
+    ax.set_xlabel('Markets')
+    ax.set_title('Business Status by Market Sector',fontweight='bold')
+    ax.set_xticks(ind + width)
+    ax.set_xticklabels( ('Health and Wellness', 'Security', 'Semiconductors') )
+    ax.set_yticks(np.arange(0,101,10))
+    ax.legend( (rects1[0], rects2[0],rects3[0]), ('Operating', 'Acquired','Closed') )
+    plt.tight_layout()
+    plt.savefig('../images/market_status.png')
+
+    #plot market sector percentages
+    market_split_df = clean_feat_df['market'].value_counts().rename_axis('market').reset_index(name='counts')[1:11]
+    market_split_df['pct']=round((market_split_df['counts']/market_split_df['counts'].sum())*100,2)
+
+    fig, ax = plt.subplots(figsize=(14,7))
+    ax.bar(market_split_df['market'],market_split_df['pct'])
+    ax.set_xlabel('Market')
+    ax.set_ylabel('Percentage (%)')
+    ax.set_title('Top Ten Market Sectors',fontweight='bold')
+    ax.set_xticklabels(('Software','Biotechnology','Mobile','Curated Web','Enterprise Software','Health Care','E-Commerce','Hardware & Software','Advertising','Health and Wellness'))
+    plt.xticks(rotation=30,ha='right')
+    plt.tight_layout()
+    plt.savefig('../images/market_split.png')
+
+    #plot status by two different funding types
+    fund_data=[]
+    funding_df = clean_feat_df[clean_feat_df['venture']>0]['status'].value_counts().rename_axis('status').reset_index(name='counts')
+    funding_df['pct'] = round((funding_df['counts']/funding_df['counts'].sum())*100,2)
+    fund_data.append(funding_df['pct'].values.tolist())
+    funding_df = clean_feat_df[clean_feat_df['equity_crowdfunding']>0]['status'].value_counts().rename_axis('status').reset_index(name='counts')
+    funding_df['pct'] = round((funding_df['counts']/funding_df['counts'].sum())*100,2)
+    equity_crowd=funding_df['pct'].values.tolist()
+    equity_crowd.append(0)
+    fund_data.append(x)
+
+    N = 2
+    operating = [fund_data[0][0],fund_data[1][0]]
+    acquired = [fund_data[0][1],fund_data[1][1]]
+    closed = [fund_data[0][2],fund_data[1][2]]
+    ind = np.arange(N)  # the x locations for the groups
+    width = 0.25       # the width of the bars
+    fig = plt.figure(figsize=(14,7))
+    ax = fig.add_subplot(111)
+    rects1 = ax.bar(ind, operating, width)
+    rects2 = ax.bar(ind+width, acquired, width)
+    rects3 = ax.bar(ind+width+width, closed, width)
+    ax.set_ylabel('Percentage(%)')
+    ax.set_xlabel('Markets')
+    ax.set_title('Business Status by Funding Types',fontweight='bold')
+    ax.set_xticks(ind + width)
+    ax.set_xticklabels( ('Venture', 'Equity Crowd Funding') )
+    ax.set_yticks(np.arange(0,101,10))
+    ax.legend( (rects1[0], rects2[0],rects3[0]), ('Operating', 'Acquired','Closed') )
+    plt.savefig('../images/funding_splits.png')
+            

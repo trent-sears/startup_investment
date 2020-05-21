@@ -57,20 +57,17 @@ After both of these plots, I wanted to take a look at the status breakdown. I kn
 
 ![](images/business_status.png)
 
-As the plot above shows my targets are heavily weighted on the operating class. This plot made me recognize that I would ultimately need to try and predict something other than operating or not. After this plot I curious to know if all markets had similar distributions and I quickly discovered they did not. Ultimately I ended up making plots for twenty different markets. In the plots below I wanted to highlight the three biggest differences I saw. 
+As the plot above shows my targets are heavily weighted on the operating class. This plot made me recognize that I would ultimately need to try and predict something other than operating or not. After this plot I curious to know if all markets had similar distributions and I quickly discovered they did not. Ultimately I ended up making plots for twenty different markets. In the plot below I wanted to highlight the three biggest differences I saw. 
 
-HealthandWellness_pie
-Security_pie
-Semiconductors_pie
+![](images/market_status.png)
 
 Because of these kinds of differences, I decided to feature engineer the market category to be the most prevalent twenty categories or to be classified as other. The first ten of these is shown below. Ultimately my top twenty made up a total of 56.74% of the entire market. 
 
-market_split
+![](images/market_split.png)
 
-Continuing on this path of looking at how select features impacted my ultimate target of status I decided to look at the different types of capital being raised. While in general, the splits were not as drastic as the market splits were, there were some interesting oddballs.
+Continuing on this path of looking at how select features impacted my ultimate target of status I decided to look at the different types of capital being raised. While in general, the splits were not as drastic as the market splits were, there were some interesting oddballs. Two of them are highlighted in the plot below. 
 
-venture_pie
-equity_crowdfunding_pie
+![](images/funding_splits.png)
 
 ## Model Preparation 
 Because of the plots above, I decided to feature engineer funding into dummy variables because an initial investor would not know how much money is going to be raised before investing. I also chose to one hot encode my targets where one represented being acquired and zero represented operating or closed. After these modifiactions and before I could perform any sort of model creation I had to find a way to balance handle the imbalanced classes. I decided to use the SMOTE technique on the training data after the test train split.
