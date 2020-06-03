@@ -168,7 +168,7 @@ if __name__ == '__main__':
     funding_df['pct'] = round((funding_df['counts']/funding_df['counts'].sum())*100,2)
     equity_crowd=funding_df['pct'].values.tolist()
     equity_crowd.append(0)
-    fund_data.append(x)
+    fund_data.append(equity_crowd)
 
     N = 2
     operating = [fund_data[0][0],fund_data[1][0]]
