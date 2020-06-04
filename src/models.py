@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 17})
+plt.style.use('ggplot')
 import folium
 import re
 from sklearn import preprocessing
