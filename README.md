@@ -1,3 +1,6 @@
+# SEE THE SLIDE DECK HERE!!!
+https://docs.google.com/presentation/d/1UBd2-2u5tFSVZUrDOU8wHlK_WMfWhi24b58eVzkUw8M/edit?usp=sharing
+
 # Startup Investment
 ![](images/Startups1.jpg)
 
