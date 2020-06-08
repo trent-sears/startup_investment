@@ -137,33 +137,21 @@ if __name__ == '__main__':
     log_model = LogisticRegression(solver="lbfgs",max_iter=300)
     log_model.fit(X_train, y_train)
     y_predict_log = log_model.predict(X_test)
-    pkl_filename = "log_model.pkl"
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(log_model, file)
 
     #build and pickle random forest model
     rf = RandomForestClassifier(max_features=42, n_estimators=100)
     rf.fit(X_train, y_train)
     y_predict_rf = rf.predict(X_test)
-    pkl_filename = "rf.pkl"
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(rf, file)
 
     #build and pickle extra trees model
     extra = ExtraTreesClassifier(n_estimators=100)
     extra.fit(X_train, y_train)
     y_predict_extra =extra.predict(X_test)
-    pkl_filename = "extra.pkl"
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(extra, file)
 
     #build and pickle gradient boosted model
     gradient= GradientBoostingClassifier(random_state=1)
     gradient.fit(X_train, y_train)
     y_predict_gradient = gradient.predict(X_test)
-    pkl_filename = "gradient.pkl"
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(gradient, file)
                                  
     #Make feature importance plot on random forest
     X =market_dummies.iloc[:,:20].join(state_dummies.iloc[:,:50])\
