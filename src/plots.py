@@ -18,7 +18,6 @@ if __name__ == '__main__':
     time_df = clean_feat_df['founded_year'].value_counts()\
         .rename_axis('year').reset_index(name='counts')
     time_df.sort_values(by='year',inplace=True)
-    time_df
     x1 = time_df[time_df['year']>1980]['year']
     y1 = time_df[time_df['year']>1980]['counts']
 
@@ -108,7 +107,9 @@ if __name__ == '__main__':
     status_df
     labels=status_df['status']
     fig, ax = plt.subplots(figsize=(14,7))
-    ax.bar(status_df['status'],status_df['pct'])
+    ax.bar(status_df['status'][:1],status_df['pct'][:1])
+    ax.bar(status_df['status'][1:2],status_df['pct'][1:2])
+    ax.bar(status_df['status'][2:3],status_df['pct'][2:3])
     ax.set_xlabel('Business Status')
     ax.set_ylabel('Percentage (%)')
     ax.set_title('Business Status Percentages',fontweight='bold')
